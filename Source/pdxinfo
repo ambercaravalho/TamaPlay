@@ -1,6 +1,6 @@
-name=Playdate-VSCode-Template
-author=Loughlin McSweeney
-description=A simple jump off point for your next 1-bit masterpiece.
-bundleID=com.developer.package
-version=0.0.1
-buildNumber=1
+name=TamaPlay
+author=Amber Caravalho
+description=Generation 1 Tamagotchi rewrite for the Panic Playdate.
+bundleID=com.amberiscoding.tamaplay
+version=0.1
+buildNumber=2
