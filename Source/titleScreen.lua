@@ -1,39 +1,32 @@
+import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
+import "CoreLibs/timer"
 
-local coreGame = import("coreGame")
+-- graphics alias
+local gfx <const> = playdate.graphics
 
--- alias for graphics module
-local gfx = playdate.graphics
+-- load background image
+local backgroundImage = gfx.image.new("img/titleScreen.png")
+assert(backgroundImage)
 
--- load title screen image
-local titleImage = gfx.image.new("img/titleScreen.png")
-assert(titleImage, "!! Failed to load title screen image. [img/titleScreen.png] !!")
+-- title screen object
+titleScreen = {}
 
-local titleScreen = {}
+titleScreen.isActive = true
+print("DEBUG: isActive == true. [titleScreen]")
 
--- set up game environment
-function titleScreen.start()
-    -- create sprite and set image as the background
-    gfx.sprite.setBackgroundDrawingCallback(function()
-        titleImage:draw(0, 0)
-    end)
+-- draw title screen
+function titleScreen.init()
+    gfx.sprite.setBackgroundDrawingCallback(backgroundImage:draw(0, 0))
+    print("DEBUG: Background drawn to frame. [titleScreen]")
 end
 
--- deactivate title screen when 'a' is pressed
+-- switch to coreGame scene when 'A' button is pressed
 function titleScreen.update()
-    if playdate.buttonJustPressed(playdate.kButtonA) then
-        titleScreen.active = false
-        coreGame.start()
+    if playdate.buttonIsPressed(playdate.kButtonA) then
+        titleScreen.isActive = false
+        print("DEBUG: Transition to coreGame scene. [titleScreen]")
+        coreGame.init()
     end
 end
-
--- returns title screen status (true/false)
-function titleScreen.isActive()
-    return titleScreen.active
-end
-
--- set title screen as active when game starts
-titleScreen.active = true
-
-return titleScreen

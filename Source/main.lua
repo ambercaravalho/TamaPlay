@@ -1,23 +1,26 @@
+import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
+import "titleScreen"
+import "coreGame"
 
-local titleScreen = import("titleScreen")
-local coreGame = import("coreGame")
+-- graphics alias
+local gfx <const> = playdate.graphics
 
--- alias for graphics module
-local gfx = playdate.graphics
-
--- starts titleScreen.lua
+-- initialize the title screen
 function playdate.start()
-    titleScreen.start()
+    titleScreen.init()
+    print("DEBUG: titleScreen initialized. (COMPLETE) [main]")
 end
 
--- transitions from titleScreen.lua to coreGame.lua
+-- update all scenes, handle scene transitions
 function playdate.update()
-    if titleScreen.isActive() then
+    if titleScreen.isActive then
         titleScreen.update()
     else
         coreGame.update()
     end
 end
+
+playdate.start()

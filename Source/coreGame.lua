@@ -1,28 +1,25 @@
+import "CoreLibs/object"
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
+import "CoreLibs/timer"
 
--- alias for graphics module
-local gfx = playdate.graphics
+-- graphics alias
+local gfx <const> = playdate.graphics
 
 -- load background image
-local bgImage = gfx.image.new("img/coreGame_bg.png")
-assert(bgImage, "!! Failed to load core game background image. [img/coreGame_bg.png] !!")
+local backgroundImage = gfx.image.new("img/coreGame_bg.png")
+assert(backgroundImage)
 
-local coreGame = {}
+-- coreGame object
+coreGame = {}
 
--- set up game environment
-function coreGame.start()
-    -- clear previous background
-    gfx.sprite.setBackgroundDrawingCallback(nil)
-
-    -- create sprite and set image as the background
-    gfx.sprite.setBackgroundDrawingCallback(function(x, y, width, height)
-        bgImage:draw(0, 0)
-    end)
+-- draw game scene
+function coreGame.init()
+    gfx.sprite.setBackgroundDrawingCallback(backgroundImage:draw(0, 0))
+    print("DEBUG: Background drawn to frame. [coreGame]")
 end
 
+-- update game logic
 function coreGame.update()
-    gfx.sprite.update()
+    -- Update game logic here
 end
-
-return coreGame
