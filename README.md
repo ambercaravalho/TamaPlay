@@ -12,7 +12,7 @@ Generation 1 Tamagotchi rewrite for the Panic Playdate, written in Lua using the
 I've fallen in love with Panic's [Playdate](https://play.date), and like pretty much everyone who's touched the thing, I wanted to try my hand at game development! The Playdate has plenty of parallels to the original [Tamagotchi](https://tamagotchi.fandom.com/wiki/Tamagotchi_(1996_Pet)) (read: it's a cute handheld), so I chose to natively remake generation 1 for this device. 
 
 <p align="center">
-  <strong>I mean, look how fun these are!<strong/>
+  <strong>I mean, look how fun these are!</strong>
 </p>
 
 <p align="center">
