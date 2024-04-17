@@ -7,7 +7,7 @@ local gfx = playdate.graphics
 -- load image
 local image = gfx.image.new("img/gen1_a_bg.png")
 
--- ensure image is loaded correctly
+-- break if image is null
 assert(image)
 
 -- set up game environment

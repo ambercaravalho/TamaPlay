@@ -2,4 +2,4 @@
 .luarc.json
 .vscode/
 bin/
-img/*~
+Source/img/*~
