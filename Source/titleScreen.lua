@@ -7,14 +7,14 @@ import "CoreLibs/timer"
 local gfx <const> = playdate.graphics
 
 -- load background image
-local backgroundImage = gfx.image.new("img/titleScreen.png")
+local backgroundImage = gfx.image.new("img/titleScreen_bg.png")
 assert(backgroundImage)
 
 -- title screen object
 titleScreen = {}
 
+-- track title screen state
 titleScreen.isActive = true
-print("DEBUG: isActive == true. [titleScreen]")
 
 -- draw title screen
 function titleScreen.init()
