@@ -1,27 +1,23 @@
 import "CoreLibs/graphics"
 import "CoreLibs/sprites"
+import "CoreLibs/timer"
+
+local titleScreen = import("titleScreen")
+local coreGame = import("coreGame")
 
 -- alias for graphics module
 local gfx = playdate.graphics
 
--- load image
-local image = gfx.image.new("img/gen1_a_bg.png")
-
--- break if image is null
-assert(image)
-
--- set up game environment
-local function setup()
-    -- set the image as the background
-    gfx.sprite.setBackgroundDrawingCallback(function(x, y, width, height)
-        image:draw(0, 0)
-    end)
+-- starts titleScreen.lua
+function playdate.start()
+    titleScreen.start()
 end
 
--- init game environment
-setup()
-
--- main update loop
+-- transitions from titleScreen.lua to coreGame.lua
 function playdate.update()
-    gfx.sprite.update()
+    if titleScreen.isActive() then
+        titleScreen.update()
+    else
+        coreGame.update()
+    end
 end
