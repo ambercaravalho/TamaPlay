@@ -1,28 +1,28 @@
-import "greeting"
+import "CoreLibs/graphics"
+import "CoreLibs/sprites"
 
-local gfx <const> = playdate.graphics
-local font = gfx.font.new('font/Mini Sans 2X')
+-- Get a shorter alias for the graphics module
+local gfx = playdate.graphics
 
-local greeting = greeting(3, -1)
+-- Load the PNG image
+local image = gfx.image.new("img/gen1_bg.png")
 
-local function loadGame()
-	playdate.display.setRefreshRate(50)
-	gfx.setFont(font)
+-- Assert to ensure the image is loaded correctly
+assert(image)
+
+-- Function to set up the game environment
+function setup()
+    -- Set the image as the background
+    gfx.sprite.setBackgroundDrawingCallback(function(x, y, width, height)
+        -- Draw the image at position (0, 0)
+        image:draw(0, 0)
+    end)
 end
 
-local function updateGame()
-	greeting:update()
-end
+-- Call setup to initialize the game environment
+setup()
 
-local function drawGame()
-	gfx.clear()
-	greeting:draw()
-end
-
-loadGame()
-
+-- The main update loop
 function playdate.update()
-	updateGame()
-	drawGame()
-	playdate.drawFPS(5,5)
+    gfx.sprite.update()
 end
