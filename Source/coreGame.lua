@@ -7,7 +7,7 @@ import "CoreLibs/timer"
 local gfx <const> = playdate.graphics
 
 -- load background image
-local backgroundImage = gfx.image.new("img/coreGame_bg.png")
+local backgroundImage = gfx.image.new("img/bg/coreGame.png")
 assert(backgroundImage)
 
 -- coreGame object

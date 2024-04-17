@@ -1,7 +1,7 @@
 name=TamaPlay
 author=Amber Caravalho
-description=Generation 1 Tamagotchi rewrite for the Panic Playdate, written in Lua using the Playdate SDK.
+description=Generation 1 Tamagotchi rewrite for the Panic Playdate.
 bundleID=com.amberiscoding.tamaplay
 version=0.1
-buildNumber=109
+buildNumber=1
 imagePath=img

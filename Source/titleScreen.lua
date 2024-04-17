@@ -7,7 +7,7 @@ import "CoreLibs/timer"
 local gfx <const> = playdate.graphics
 
 -- load background image
-local backgroundImage = gfx.image.new("img/titleScreen_bg.png")
+local backgroundImage = gfx.image.new("img/bg/titleScreen.png")
 assert(backgroundImage)
 
 -- title screen object

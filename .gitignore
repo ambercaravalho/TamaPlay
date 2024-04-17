@@ -2,6 +2,7 @@
 .luarc.json
 .vscode/
 bin/
-Source/ico/*~
 Source/img/*~
+Source/img/*/*~
 Source/img/*autosave*
+Source/img/*/*autosave*
