@@ -8,7 +8,7 @@ local gfx <const> = playdate.graphics
 
 -- load background image
 local backgroundImage = gfx.image.new("img/bg/titleScreen.png")
-assert(backgroundImage)
+assert(backgroundImage, "ERROR: Failed to load background image. [titleScreen]")
 
 -- title screen object
 titleScreen = {}

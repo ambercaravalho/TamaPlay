@@ -3,5 +3,5 @@ author=Amber Caravalho
 description=Generation 1 Tamagotchi rewrite for the Panic Playdate.
 bundleID=com.amberiscoding.tamaplay
 version=0.1
-buildNumber=1
+buildNumber=20
 imagePath=img
