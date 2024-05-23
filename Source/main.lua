@@ -55,17 +55,20 @@ end
 
 -- Function to draw the icons
 local function drawIcons()
+    -- Default scaling factor for the icons
+    local scale = 0.6
+
     -- Top row icons
-    foodIcon:draw(40, 10)
-    lightIcon:draw(120, 10)
-    gameIcon:draw(200, 10)
-    medicineIcon:draw(280, 10)
+    foodIcon:drawScaled(60, 5, 0.5)
+    lightIcon:drawScaled(140, 5, 0.55)
+    gameIcon:drawScaled(220, 5, scale)
+    medicineIcon:drawScaled(300, 5, scale)
     
     -- Bottom row icons
-    bathroomIcon:draw(40, 190)
-    meterIcon:draw(120, 190)
-    disciplineIcon:draw(200, 190)
-    attentionIcon:draw(280, 190)
+    bathroomIcon:drawScaled(60, 200, scale)
+    meterIcon:drawScaled(140, 200, scale)
+    disciplineIcon:drawScaled(220, 200, scale)
+    attentionIcon:drawScaled(300, 200, 0.7)
 end
 
 -- Function to handle growth
