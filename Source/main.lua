@@ -17,7 +17,8 @@ local pet = {
     poopCount = 0,
     sick = false,
     asleep = false,
-    lastUpdate = playdate.getCurrentTimeMilliseconds()
+    lastUpdate = playdate.getCurrentTimeMilliseconds(),
+    hoverIndex = nil     -- Index of the hovered icon (1-8)
 }
 
 -- Load assets (PNG images)
@@ -41,6 +42,23 @@ local meterIcon = loadImage("img/icons/status_dark.png")
 local disciplineIcon = loadImage("img/icons/training_dark.png")
 local attentionIcon = loadImage("img/icons/attention_dark.png")
 
+-- Define icon positions
+local icons = {
+    {image = foodIcon, x = 60, y = 5, scale = 0.5},
+    {image = lightIcon, x = 140, y = 5, scale = 0.55},
+    {image = gameIcon, x = 220, y = 5, scale = 0.6},
+    {image = medicineIcon, x = 300, y = 5, scale = 0.6},
+    {image = bathroomIcon, x = 60, y = 200, scale = 0.6},
+    {image = meterIcon, x = 140, y = 200, scale = 0.6},
+    {image = disciplineIcon, x = 220, y = 200, scale = 0.6},
+    {image = attentionIcon, x = 300, y = 200, scale = 0.7}
+}
+
+-- Add hover and flash state
+local hoverFlashTimer = playdate.timer.new(1000, 1, 0)
+hoverFlashTimer.repeats = true
+local isFlashing = true
+
 -- Function to draw the background
 local function drawBackground()
     backgroundImage:draw(0, 0)
@@ -55,25 +73,29 @@ end
 
 -- Function to draw the icons
 local function drawIcons()
-    -- Default scaling factor for the icons
-    local scale = 0.6
-
-    -- Top row icons
-    foodIcon:drawScaled(60, 5, 0.5)
-    lightIcon:drawScaled(140, 5, 0.55)
-    gameIcon:drawScaled(220, 5, scale)
-    medicineIcon:drawScaled(300, 5, scale)
-    
-    -- Bottom row icons
-    bathroomIcon:drawScaled(60, 200, scale)
-    meterIcon:drawScaled(140, 200, scale)
-    disciplineIcon:drawScaled(220, 200, scale)
-    attentionIcon:drawScaled(300, 200, 0.7)
+    for i, icon in ipairs(icons) do
+        if pet.hoverIndex == i then
+            if isFlashing and hoverFlashTimer.value > 0.5 then
+                icon.image:drawScaled(icon.x, icon.y, icon.scale)
+            elseif not isFlashing then
+                icon.image:drawScaled(icon.x, icon.y, icon.scale)
+            end
+        else
+            icon.image:drawScaled(icon.x, icon.y, icon.scale)
+        end
+    end
 end
 
 -- Function to handle growth
 local function handleGrowth()
     pet.age += 1
+end
+
+-- Function to handle lifespan
+local function handleLifespan()
+    if pet.health <= 0 then
+        pet.isAlive = false
+    end
 end
 
 -- Function to handle care
@@ -104,13 +126,6 @@ local function handleCare()
 
     -- Check for death conditions
     handleLifespan()
-end
-
--- Function to handle lifespan
-local function handleLifespan()
-    if pet.health <= 0 then
-        pet.isAlive = false
-    end
 end
 
 -- Function to handle clock
@@ -184,11 +199,11 @@ end
 
 -- Function to show meter
 local function showMeter()
-    gfx.drawText("Age: " .. pet.age, 10, 200)
-    gfx.drawText("Hunger: " .. pet.hunger, 10, 220)
-    gfx.drawText("Happiness: " .. pet.happiness, 100, 200)
-    gfx.drawText("Health: " .. pet.health, 100, 220)
-    gfx.drawText("Discipline: " .. pet.discipline, 200, 200)
+    gfx.drawText("Age: " .. pet.age, 10, 220)
+    gfx.drawText("Hunger: " .. pet.hunger, 100, 220)
+    gfx.drawText("Happiness: " .. pet.happiness, 190, 220)
+    gfx.drawText("Health: " .. pet.health, 280, 220)
+    gfx.drawText("Discipline: " .. pet.discipline, 370, 220)
 end
 
 -- Function to discipline the pet
@@ -218,6 +233,64 @@ local function handleDeath()
     end
 end
 
+-- Function to handle input
+local function handleInput()
+    if playdate.buttonJustPressed(playdate.kButtonRight) then
+        isFlashing = true
+        if pet.hoverIndex == nil then
+            pet.hoverIndex = 1
+        elseif pet.hoverIndex % 4 == 0 then
+            pet.hoverIndex = pet.hoverIndex - 3
+        else
+            pet.hoverIndex = pet.hoverIndex + 1
+        end
+    elseif playdate.buttonJustPressed(playdate.kButtonLeft) then
+        isFlashing = true
+        if pet.hoverIndex == nil then
+            pet.hoverIndex = 1
+        elseif pet.hoverIndex % 4 == 1 then
+            pet.hoverIndex = pet.hoverIndex + 3
+        else
+            pet.hoverIndex = pet.hoverIndex - 1
+        end
+    elseif playdate.buttonJustPressed(playdate.kButtonDown) then
+        isFlashing = true
+        if pet.hoverIndex == nil then
+            pet.hoverIndex = 1
+        elseif pet.hoverIndex <= 4 then
+            pet.hoverIndex = pet.hoverIndex + 4
+        end
+    elseif playdate.buttonJustPressed(playdate.kButtonUp) then
+        isFlashing = true
+        if pet.hoverIndex == nil then
+            pet.hoverIndex = 1
+        elseif pet.hoverIndex > 4 then
+            pet.hoverIndex = pet.hoverIndex - 4
+        end
+    elseif playdate.buttonJustPressed(playdate.kButtonA) then
+        isFlashing = false
+        if pet.hoverIndex then
+            if pet.hoverIndex == 1 then
+                feedPet()
+            elseif pet.hoverIndex == 2 then
+                handleLight()
+            elseif pet.hoverIndex == 3 then
+                playGame()
+            elseif pet.hoverIndex == 4 then
+                giveMedicine()
+            elseif pet.hoverIndex == 5 then
+                cleanBathroom()
+            elseif pet.hoverIndex == 6 then
+                showMeter()
+            elseif pet.hoverIndex == 7 then
+                disciplinePet()
+            elseif pet.hoverIndex == 8 then
+                handleAttention()
+            end
+        end
+    end
+end
+
 -- Main update function
 function playdate.update()
     gfx.clear()
@@ -226,37 +299,7 @@ function playdate.update()
     drawPet()
     handleClock()
     handleDeath()
-    showMeter()
+    handleInput()
     gfx.sprite.update()
     playdate.timer.updateTimers()
-end
-
--- Button handlers
-function playdate.AButtonDown()
-    feedPet()
-end
-
-function playdate.BButtonDown()
-    cleanBathroom()
-end
-
-function playdate.leftButtonDown()
-    handleLight()
-end
-
-function playdate.rightButtonDown()
-    playGame()
-end
-
-function playdate.upButtonDown()
-    giveMedicine()
-end
-
-function playdate.downButtonDown()
-    disciplinePet()
-end
-
--- Crank handler for attention
-function playdate.cranked()
-    handleAttention()
 end
