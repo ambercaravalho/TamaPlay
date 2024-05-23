@@ -20,18 +20,26 @@ local pet = {
     lastUpdate = playdate.getCurrentTimeMilliseconds()
 }
 
--- Load assets (SVG images)
-local backgroundImage = gfx.image.new("img/assets/background.svg")
-local petImage = gfx.image.new("img/assets/pet.svg")
-local poopImage = gfx.image.new("img/assets/poop.svg")
-local foodIcon = gfx.image.new("img/icons/food_icon.svg")
-local lightIcon = gfx.image.new("img/icons/light_icon.svg")
-local gameIcon = gfx.image.new("img/icons/game_icon.svg")
-local medicineIcon = gfx.image.new("img/icons/medicine_icon.svg")
-local bathroomIcon = gfx.image.new("img/icons/bathroom_icon.svg")
-local meterIcon = gfx.image.new("img/icons/meter_icon.svg")
-local disciplineIcon = gfx.image.new("img/icons/discipline_icon.svg")
-local attentionIcon = gfx.image.new("img/icons/attention_icon.svg")
+-- Load assets (PNG images)
+local function loadImage(imagePath)
+    local image = gfx.image.new(imagePath)
+    if not image then
+        error("Failed to load image: " .. imagePath)
+    end
+    return image
+end
+
+local backgroundImage = loadImage("img/assets/background.png")
+local petImage = loadImage("img/assets/pet.png")
+-- local poopImage = loadImage("img/assets/poop.png")
+local foodIcon = loadImage("img/icons/food_dark.png")
+local lightIcon = loadImage("img/icons/lights_dark.png")
+local gameIcon = loadImage("img/icons/game_dark.png")
+local medicineIcon = loadImage("img/icons/medicine_dark.png")
+local bathroomIcon = loadImage("img/icons/bathroom_dark.png")
+local meterIcon = loadImage("img/icons/status_dark.png")
+local disciplineIcon = loadImage("img/icons/training_dark.png")
+local attentionIcon = loadImage("img/icons/attention_dark.png")
 
 -- Function to draw the background
 local function drawBackground()
@@ -47,14 +55,17 @@ end
 
 -- Function to draw the icons
 local function drawIcons()
-    foodIcon:draw(10, 10)
-    lightIcon:draw(50, 10)
-    gameIcon:draw(90, 10)
-    medicineIcon:draw(130, 10)
-    bathroomIcon:draw(170, 10)
-    meterIcon:draw(210, 10)
-    disciplineIcon:draw(250, 10)
-    attentionIcon:draw(290, 10)
+    -- Top row icons
+    foodIcon:draw(40, 10)
+    lightIcon:draw(120, 10)
+    gameIcon:draw(200, 10)
+    medicineIcon:draw(280, 10)
+    
+    -- Bottom row icons
+    bathroomIcon:draw(40, 190)
+    meterIcon:draw(120, 190)
+    disciplineIcon:draw(200, 190)
+    attentionIcon:draw(280, 190)
 end
 
 -- Function to handle growth
