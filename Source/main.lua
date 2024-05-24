@@ -141,38 +141,134 @@ local function handleClock()
 end
 
 -- Function to feed the pet
+local feedMenuActive = false
+local feedOptions = {"Meal", "Snack"}
+local selectedFeedOption = 1
+
 local function feedPet()
-    if pet.hunger > 0 then
-        pet.hunger -= 1
-        pet.happiness += 1
-        if pet.happiness > 10 then
-            pet.happiness = 10
+    -- Display feed options and handle selection
+    gfx.clear()
+    drawBackground()
+    drawIcons()
+    gfx.drawText("Feed", 180, 60)
+    for i, option in ipairs(feedOptions) do
+        if i == selectedFeedOption then
+            gfx.drawText("-> " .. option, 180, 80 + 20 * i)
+        else
+            gfx.drawText(option, 200, 80 + 20 * i)
         end
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonA) then
+        if selectedFeedOption == 1 then
+            pet.hunger = math.max(pet.hunger - 2, 0)
+            pet.happiness = math.min(pet.happiness + 1, 10)
+        elseif selectedFeedOption == 2 then
+            pet.hunger = math.max(pet.hunger - 1, 0)
+            pet.happiness = math.min(pet.happiness + 1, 10)
+        end
+        feedMenuActive = false
+        isFlashing = true -- Allow flashing again after action
+    elseif playdate.buttonJustPressed(playdate.kButtonUp) then
+        selectedFeedOption = selectedFeedOption - 1
+        if selectedFeedOption < 1 then selectedFeedOption = #feedOptions end
+    elseif playdate.buttonJustPressed(playdate.kButtonDown) then
+        selectedFeedOption = selectedFeedOption + 1
+        if selectedFeedOption > #feedOptions then selectedFeedOption = 1 end
     end
 end
 
 -- Function to handle light (toggle sleep)
+local lightMenuActive = false
+local lightOptions = {"On", "Off"}
+local selectedLightOption = 1
+
 local function handleLight()
-    pet.asleep = not pet.asleep
-    if pet.asleep then
-        pet.happiness += 1
-    else
-        pet.happiness -= 1
+    lightMenuActive = true
+
+    -- Display light options and handle selection
+    gfx.clear()
+    drawBackground()
+    drawIcons()
+    gfx.drawText("Light", 180, 60)
+    for i, option in ipairs(lightOptions) do
+        if i == selectedLightOption then
+            gfx.drawText("-> " .. option, 180, 80 + 20 * i)
+        else
+            gfx.drawText(option, 200, 80 + 20 * i)
+        end
+    end
+
+    if playdate.buttonJustPressed(playdate.kButtonA) then
+        if selectedLightOption == 1 then
+            pet.asleep = false
+            gfx.drawText("Lights On", 180, 100)
+        elseif selectedLightOption == 2 then
+            pet.asleep = true
+            gfx.drawText("Lights Off", 180, 100)
+        end
+        lightMenuActive = false
+        isFlashing = true -- Allow flashing again after action
+    elseif playdate.buttonJustPressed(playdate.kButtonUp) then
+        selectedLightOption = selectedLightOption - 1
+        if selectedLightOption < 1 then selectedLightOption = #lightOptions end
+    elseif playdate.buttonJustPressed(playdate.kButtonDown) then
+        selectedLightOption = selectedLightOption + 1
+        if selectedLightOption > #lightOptions then selectedLightOption = 1 end
     end
 end
 
 -- Function to play a game (Left or Right and Higher or Lower)
+local gameMenuActive = false
+local gameOptions = {"Left", "Right"}
+local selectedGameOption = 1
+local gameResultMessage = ""
+local gameResultActive = false
+
 local function playGame()
-    local gameResult = math.random(0, 1) -- Simple 50/50 game
-    if gameResult == 1 then
-        pet.happiness += 2
-        if pet.happiness > 10 then
-            pet.happiness = 10
+    if not gameResultActive then
+        gameMenuActive = true
+
+        -- Display game options and handle selection
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText("Game", 180, 60)
+        for i, option in ipairs(gameOptions) do
+            if i == selectedGameOption then
+                gfx.drawText("-> " .. option, 180, 80 + 20 * i)
+            else
+                gfx.drawText(option, 200, 80 + 20 * i)
+            end
+        end
+
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            local gameResult = math.random(1, 2) -- Randomly select left or right
+            if gameResult == selectedGameOption then
+                pet.happiness = math.min(pet.happiness + 2, 10)
+                gameResultMessage = "You Win!"
+            else
+                pet.happiness = math.max(pet.happiness - 1, 0)
+                gameResultMessage = "You Lose!"
+            end
+            gameResultActive = true
+            gameMenuActive = false
+        elseif playdate.buttonJustPressed(playdate.kButtonUp) then
+            selectedGameOption = selectedGameOption - 1
+            if selectedGameOption < 1 then selectedGameOption = #gameOptions end
+        elseif playdate.buttonJustPressed(playdate.kButtonDown) then
+            selectedGameOption = selectedGameOption + 1
+            if selectedGameOption > #gameOptions then selectedGameOption = 1 end
         end
     else
-        pet.happiness -= 1
-        if pet.happiness < 0 then
-            pet.happiness = 0
+        -- Display game result message
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText(gameResultMessage, 180, 100)
+        if playdate.buttonJustPressed(playdate.kButtonA) or playdate.buttonJustPressed(playdate.kButtonB) then
+            gameResultActive = false
+            isFlashing = true -- Allow flashing again after action
         end
     end
 end
@@ -229,77 +325,93 @@ end
 local function handleDeath()
     if not pet.isAlive then
         gfx.drawText("Your pet has died.", 50, 100)
-        -- Optionally, you could implement a reset or restart function here
     end
 end
 
 -- Function to handle input
 local function handleInput()
-    if playdate.buttonJustPressed(playdate.kButtonRight) then
-        isFlashing = true
-        if pet.hoverIndex == nil then
-            pet.hoverIndex = 1
-        elseif pet.hoverIndex % 4 == 0 then
-            pet.hoverIndex = pet.hoverIndex - 3
-        else
-            pet.hoverIndex = pet.hoverIndex + 1
-        end
-    elseif playdate.buttonJustPressed(playdate.kButtonLeft) then
-        isFlashing = true
-        if pet.hoverIndex == nil then
-            pet.hoverIndex = 1
-        elseif pet.hoverIndex % 4 == 1 then
-            pet.hoverIndex = pet.hoverIndex + 3
-        else
-            pet.hoverIndex = pet.hoverIndex - 1
-        end
-    elseif playdate.buttonJustPressed(playdate.kButtonDown) then
-        isFlashing = true
-        if pet.hoverIndex == nil then
-            pet.hoverIndex = 1
-        elseif pet.hoverIndex <= 4 then
-            pet.hoverIndex = pet.hoverIndex + 4
-        end
-    elseif playdate.buttonJustPressed(playdate.kButtonUp) then
-        isFlashing = true
-        if pet.hoverIndex == nil then
-            pet.hoverIndex = 1
-        elseif pet.hoverIndex > 4 then
-            pet.hoverIndex = pet.hoverIndex - 4
-        end
-    elseif playdate.buttonJustPressed(playdate.kButtonA) then
-        isFlashing = false
-        if pet.hoverIndex then
-            if pet.hoverIndex == 1 then
-                feedPet()
-            elseif pet.hoverIndex == 2 then
-                handleLight()
-            elseif pet.hoverIndex == 3 then
-                playGame()
-            elseif pet.hoverIndex == 4 then
-                giveMedicine()
-            elseif pet.hoverIndex == 5 then
-                cleanBathroom()
-            elseif pet.hoverIndex == 6 then
-                showMeter()
-            elseif pet.hoverIndex == 7 then
-                disciplinePet()
-            elseif pet.hoverIndex == 8 then
-                handleAttention()
+    if not feedMenuActive and not lightMenuActive and not gameMenuActive and not gameResultActive then
+        if playdate.buttonJustPressed(playdate.kButtonRight) then
+            isFlashing = true
+            if pet.hoverIndex == nil then
+                pet.hoverIndex = 1
+            elseif pet.hoverIndex % 4 == 0 then
+                pet.hoverIndex = pet.hoverIndex - 3
+            else
+                pet.hoverIndex = pet.hoverIndex + 1
+            end
+        elseif playdate.buttonJustPressed(playdate.kButtonLeft) then
+            isFlashing = true
+            if pet.hoverIndex == nil then
+                pet.hoverIndex = 1
+            elseif pet.hoverIndex % 4 == 1 then
+                pet.hoverIndex = pet.hoverIndex + 3
+            else
+                pet.hoverIndex = pet.hoverIndex - 1
+            end
+        elseif playdate.buttonJustPressed(playdate.kButtonDown) then
+            isFlashing = true
+            if pet.hoverIndex == nil then
+                pet.hoverIndex = 1
+            elseif pet.hoverIndex <= 4 then
+                pet.hoverIndex = pet.hoverIndex + 4
+            end
+        elseif playdate.buttonJustPressed(playdate.kButtonUp) then
+            isFlashing = true
+            if pet.hoverIndex == nil then
+                pet.hoverIndex = 1
+            elseif pet.hoverIndex > 4 then
+                pet.hoverIndex = pet.hoverIndex - 4
+            end
+        elseif playdate.buttonJustPressed(playdate.kButtonA) then
+            isFlashing = false
+            if pet.hoverIndex then
+                if pet.hoverIndex == 1 then
+                    feedMenuActive = true
+                elseif pet.hoverIndex == 2 then
+                    lightMenuActive = true
+                elseif pet.hoverIndex == 3 then
+                    gameMenuActive = true
+                elseif pet.hoverIndex == 4 then
+                    giveMedicine()
+                elseif pet.hoverIndex == 5 then
+                    cleanBathroom()
+                elseif pet.hoverIndex == 6 then
+                    showMeter()
+                elseif pet.hoverIndex == 7 then
+                    disciplinePet()
+                elseif pet.hoverIndex == 8 then
+                    handleAttention()
+                end
             end
         end
+    elseif feedMenuActive then
+        feedPet()
+    elseif lightMenuActive then
+        handleLight()
+    elseif gameMenuActive or gameResultActive then
+        playGame()
     end
 end
 
 -- Main update function
 function playdate.update()
     gfx.clear()
-    drawBackground()
-    drawIcons()
-    drawPet()
-    handleClock()
-    handleDeath()
-    handleInput()
+    if feedMenuActive then
+        feedPet()
+    elseif lightMenuActive then
+        handleLight()
+    elseif gameMenuActive or gameResultActive then
+        playGame()
+    else
+        drawBackground()
+        drawIcons()
+        drawPet()
+        handleClock()
+        handleDeath()
+        showMeter()
+        handleInput()
+    end
     gfx.sprite.update()
     playdate.timer.updateTimers()
 end
