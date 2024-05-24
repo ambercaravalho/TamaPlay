@@ -218,7 +218,7 @@ local function handleLight()
     end
 end
 
--- Function to play a game (Left or Right and Higher or Lower)
+-- Function to play a game (Left or Right)
 local gameMenuActive = false
 local gameOptions = {"Left", "Right"}
 local selectedGameOption = 1
@@ -274,40 +274,146 @@ local function playGame()
 end
 
 -- Function to give medicine
+local medicineMenuActive = false
+local medicineResultMessage = ""
+local medicineResultActive = false
+
 local function giveMedicine()
-    if pet.sick then
-        pet.sick = false
-        pet.health += 20
-        if pet.health > 100 then
-            pet.health = 100
+    if not medicineResultActive then
+        medicineMenuActive = true
+
+        -- Display medicine confirmation and handle selection
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText("Give Medicine?", 160, 80)
+        gfx.drawText("A: Yes  B: No", 170, 100)
+
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            if pet.sick then
+                pet.sick = false
+                pet.health = math.min(pet.health + 20, 100)
+                medicineResultMessage = "Medicine Given"
+            else
+                medicineResultMessage = "Not Sick"
+            end
+            medicineResultActive = true
+            medicineMenuActive = false
+        elseif playdate.buttonJustPressed(playdate.kButtonB) then
+            medicineMenuActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
+    else
+        -- Display medicine result message
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText(medicineResultMessage, 180, 100)
+        if playdate.buttonJustPressed(playdate.kButtonA) or playdate.buttonJustPressed(playdate.kButtonB) then
+            medicineResultActive = false
+            isFlashing = true -- Allow flashing again after action
         end
     end
 end
 
 -- Function to clean bathroom
+local bathroomMenuActive = false
+local bathroomResultMessage = ""
+local bathroomResultActive = false
+
 local function cleanBathroom()
-    pet.poopCount = 0
-    pet.happiness += 1
-    if pet.happiness > 10 then
-        pet.happiness = 10
+    if not bathroomResultActive then
+        bathroomMenuActive = true
+
+        -- Display bathroom confirmation and handle selection
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText("Clean Bathroom?", 160, 80)
+        gfx.drawText("A: Yes  B: No", 170, 100)
+
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            pet.poopCount = 0
+            pet.happiness = math.min(pet.happiness + 1, 10)
+            bathroomResultMessage = "Bathroom Cleaned"
+            bathroomResultActive = true
+            bathroomMenuActive = false
+        elseif playdate.buttonJustPressed(playdate.kButtonB) then
+            bathroomMenuActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
+    else
+        -- Display bathroom result message
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText(bathroomResultMessage, 180, 100)
+        if playdate.buttonJustPressed(playdate.kButtonA) or playdate.buttonJustPressed(playdate.kButtonB) then
+            bathroomResultActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
     end
 end
 
 -- Function to show meter
+local meterMenuActive = false
+
 local function showMeter()
-    gfx.drawText("Age: " .. pet.age, 10, 220)
-    gfx.drawText("Hunger: " .. pet.hunger, 100, 220)
-    gfx.drawText("Happiness: " .. pet.happiness, 190, 220)
-    gfx.drawText("Health: " .. pet.health, 280, 220)
-    gfx.drawText("Discipline: " .. pet.discipline, 370, 220)
+    meterMenuActive = true
+
+    -- Display pet stats
+    gfx.clear()
+    drawBackground()
+    drawIcons()
+    gfx.drawText("Stats", 180, 60)
+    gfx.drawText("Age: " .. pet.age, 160, 80)
+    gfx.drawText("Hunger: " .. pet.hunger, 160, 100)
+    gfx.drawText("Happiness: " .. pet.happiness, 160, 120)
+    gfx.drawText("Health: " .. pet.health, 160, 140)
+    gfx.drawText("Discipline: " .. pet.discipline, 160, 160)
+
+    if playdate.buttonJustPressed(playdate.kButtonA) or playdate.buttonJustPressed(playdate.kButtonB) then
+        meterMenuActive = false
+        isFlashing = true -- Allow flashing again after action
+    end
 end
 
 -- Function to discipline the pet
+local disciplineMenuActive = false
+local disciplineResultMessage = ""
+local disciplineResultActive = false
+
 local function disciplinePet()
-    pet.discipline += 1
-    pet.happiness -= 1
-    if pet.happiness < 0 then
-        pet.happiness = 0
+    if not disciplineResultActive then
+        disciplineMenuActive = true
+
+        -- Display discipline confirmation and handle selection
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText("Discipline?", 180, 80)
+        gfx.drawText("A: Yes  B: No", 180, 100)
+
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            pet.discipline = math.min(pet.discipline + 1, 10)
+            pet.happiness = math.max(pet.happiness - 1, 0)
+            disciplineResultMessage = "Disciplined"
+            disciplineResultActive = true
+            disciplineMenuActive = false
+        elseif playdate.buttonJustPressed(playdate.kButtonB) then
+            disciplineMenuActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
+    else
+        -- Display discipline result message
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText(disciplineResultMessage, 180, 100)
+        if playdate.buttonJustPressed(playdate.kButtonA) or playdate.buttonJustPressed(playdate.kButtonB) then
+            disciplineResultActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
     end
 end
 
@@ -330,7 +436,7 @@ end
 
 -- Function to handle input
 local function handleInput()
-    if not feedMenuActive and not lightMenuActive and not gameMenuActive and not gameResultActive then
+    if not feedMenuActive and not lightMenuActive and not gameMenuActive and not gameResultActive and not medicineMenuActive and not medicineResultActive and not bathroomMenuActive and not bathroomResultActive and not meterMenuActive and not disciplineMenuActive and not disciplineResultActive then
         if playdate.buttonJustPressed(playdate.kButtonRight) then
             isFlashing = true
             if pet.hoverIndex == nil then
@@ -373,13 +479,13 @@ local function handleInput()
                 elseif pet.hoverIndex == 3 then
                     gameMenuActive = true
                 elseif pet.hoverIndex == 4 then
-                    giveMedicine()
+                    medicineMenuActive = true
                 elseif pet.hoverIndex == 5 then
-                    cleanBathroom()
+                    bathroomMenuActive = true
                 elseif pet.hoverIndex == 6 then
-                    showMeter()
+                    meterMenuActive = true
                 elseif pet.hoverIndex == 7 then
-                    disciplinePet()
+                    disciplineMenuActive = true
                 elseif pet.hoverIndex == 8 then
                     handleAttention()
                 end
@@ -391,6 +497,14 @@ local function handleInput()
         handleLight()
     elseif gameMenuActive or gameResultActive then
         playGame()
+    elseif medicineMenuActive or medicineResultActive then
+        giveMedicine()
+    elseif bathroomMenuActive or bathroomResultActive then
+        cleanBathroom()
+    elseif meterMenuActive then
+        showMeter()
+    elseif disciplineMenuActive or disciplineResultActive then
+        disciplinePet()
     end
 end
 
@@ -403,13 +517,20 @@ function playdate.update()
         handleLight()
     elseif gameMenuActive or gameResultActive then
         playGame()
+    elseif medicineMenuActive or medicineResultActive then
+        giveMedicine()
+    elseif bathroomMenuActive or bathroomResultActive then
+        cleanBathroom()
+    elseif meterMenuActive then
+        showMeter()
+    elseif disciplineMenuActive or disciplineResultActive then
+        disciplinePet()
     else
         drawBackground()
         drawIcons()
         drawPet()
         handleClock()
         handleDeath()
-        showMeter()
         handleInput()
     end
     gfx.sprite.update()
