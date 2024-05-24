@@ -54,11 +54,6 @@ local icons = {
     {image = attentionIcon, x = 300, y = 200, scale = 0.7}
 }
 
--- Add hover and flash state
-local hoverFlashTimer = playdate.timer.new(1000, 1, 0)
-hoverFlashTimer.repeats = true
-local isFlashing = true
-
 -- Function to draw the background
 local function drawBackground()
     backgroundImage:draw(0, 0)
@@ -70,6 +65,11 @@ local function drawPet()
         petImage:draw(184, 100) -- Centered position
     end
 end
+
+-- Add hover and flash state
+local hoverFlashTimer = playdate.timer.new(1000, 1, 0)
+hoverFlashTimer.repeats = true
+local isFlashing = true
 
 -- Function to draw the icons
 local function drawIcons()
@@ -129,14 +129,31 @@ local function handleCare()
 end
 
 -- Function to handle clock
+local lastUpdateTime = playdate.getCurrentTimeMilliseconds()
+local secondsElapsed = 0
+
 local function handleClock()
     local currentTime = playdate.getCurrentTimeMilliseconds()
-    local timeElapsed = currentTime - pet.lastUpdate
-    
-    if timeElapsed >= 60000 then -- Update every minute
-        handleGrowth()
-        handleCare()
-        pet.lastUpdate = currentTime
+    local elapsedTime = currentTime - lastUpdateTime
+
+    if elapsedTime >= 1000 then
+        secondsElapsed = secondsElapsed + math.floor(elapsedTime / 1000)
+        lastUpdateTime = currentTime
+    end
+
+    if secondsElapsed >= 60 then
+        -- Update pet state every minute
+        pet.age = pet.age + 1
+        pet.hunger = math.min(pet.hunger + 1, 10) -- Increase hunger over time
+        pet.happiness = math.max(pet.happiness - 1, 0) -- Decrease happiness over time
+        pet.health = pet.health - (pet.hunger * 0.1) -- Decrease health based on hunger
+        pet.health = pet.health - ((10 - pet.happiness) * 0.1) -- Decrease health based on happiness
+        secondsElapsed = 0
+
+        -- Check for death conditions
+        if pet.health <= 0 then
+            pet.isAlive = false
+        end
     end
 end
 
@@ -418,25 +435,81 @@ local function disciplinePet()
 end
 
 -- Function to handle attention
+local attentionMenuActive = false
+local attentionResultMessage = ""
+local attentionResultActive = false
+
 local function handleAttention()
-    pet.attention = not pet.attention
-    if pet.attention then
-        pet.happiness += 1
+    if not attentionResultActive then
+        attentionMenuActive = true
+
+        -- Display attention confirmation and handle selection
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText("Give Attention?", 160, 80)
+        gfx.drawText("A: Yes  B: No", 170, 100)
+
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            pet.attention = true
+            pet.happiness = math.min(pet.happiness + 1, 10)
+            attentionResultMessage = "Attention Given"
+            attentionResultActive = true
+            attentionMenuActive = false
+        elseif playdate.buttonJustPressed(playdate.kButtonB) then
+            attentionMenuActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
     else
-        pet.happiness -= 1
+        -- Display attention result message
+        gfx.clear()
+        drawBackground()
+        drawIcons()
+        gfx.drawText(attentionResultMessage, 180, 100)
+        if playdate.buttonJustPressed(playdate.kButtonA) or playdate.buttonJustPressed(playdate.kButtonB) then
+            attentionResultActive = false
+            isFlashing = true -- Allow flashing again after action
+        end
     end
 end
 
 -- Function to handle death
+local isDead = false
+
 local function handleDeath()
-    if not pet.isAlive then
-        gfx.drawText("Your pet has died.", 50, 100)
+    if pet.health <= 0 and not isDead then
+        pet.isAlive = false
+        isDead = true
+    end
+
+    if isDead then
+        -- Display death message
+        gfx.clear()
+        drawBackground()
+        gfx.drawText("Your pet has died.", 120, 100)
+        gfx.drawText("Press A to reset.", 120, 120)
+        
+        if playdate.buttonJustPressed(playdate.kButtonA) then
+            -- Reset pet state
+            pet.age = 0
+            pet.hunger = 5
+            pet.happiness = 5
+            pet.health = 100
+            pet.discipline = 0
+            pet.attention = false
+            pet.isAlive = true
+            pet.poopCount = 0
+            pet.sick = false
+            pet.asleep = false
+            pet.lastUpdate = playdate.getCurrentTimeMilliseconds()
+            isDead = false
+        end
     end
 end
 
 -- Function to handle input
 local function handleInput()
-    if not feedMenuActive and not lightMenuActive and not gameMenuActive and not gameResultActive and not medicineMenuActive and not medicineResultActive and not bathroomMenuActive and not bathroomResultActive and not meterMenuActive and not disciplineMenuActive and not disciplineResultActive then
+    if not isDead and not feedMenuActive and not lightMenuActive and not gameMenuActive and not gameResultActive and not medicineMenuActive and not medicineResultActive and not bathroomMenuActive and not bathroomResultActive and not meterMenuActive and not disciplineMenuActive and not disciplineResultActive and not attentionMenuActive and not attentionResultActive then
         if playdate.buttonJustPressed(playdate.kButtonRight) then
             isFlashing = true
             if pet.hoverIndex == nil then
@@ -487,7 +560,7 @@ local function handleInput()
                 elseif pet.hoverIndex == 7 then
                     disciplineMenuActive = true
                 elseif pet.hoverIndex == 8 then
-                    handleAttention()
+                    attentionMenuActive = true
                 end
             end
         end
@@ -505,13 +578,17 @@ local function handleInput()
         showMeter()
     elseif disciplineMenuActive or disciplineResultActive then
         disciplinePet()
+    elseif attentionMenuActive or attentionResultActive then
+        handleAttention()
     end
 end
 
 -- Main update function
 function playdate.update()
     gfx.clear()
-    if feedMenuActive then
+    if isDead then
+        handleDeath()
+    elseif feedMenuActive then
         feedPet()
     elseif lightMenuActive then
         handleLight()
@@ -525,12 +602,13 @@ function playdate.update()
         showMeter()
     elseif disciplineMenuActive or disciplineResultActive then
         disciplinePet()
+    elseif attentionMenuActive or attentionResultActive then
+        handleAttention()
     else
         drawBackground()
         drawIcons()
         drawPet()
         handleClock()
-        handleDeath()
         handleInput()
     end
     gfx.sprite.update()
