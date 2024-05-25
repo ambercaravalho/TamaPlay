@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install SDK
         uses: idleberg/setup-playdate-sdk@v3.0.0
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build Project
         run: |
-          pdc source ${{ env.BUILD_OUTPUT }}.pdx
+          pdc Source ${{ env.BUILD_OUTPUT }}.pdx
           zip -r -9 ${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip ${{ env.BUILD_OUTPUT }}.pdx
 
       - name: Upload Build Artifact
