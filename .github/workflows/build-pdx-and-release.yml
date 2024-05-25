@@ -55,13 +55,16 @@ jobs:
           build_number=$(grep -oP '(?<=buildNumber=)\d+' Source/pdxinfo)
           echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
 
-      - name: Install GitHub CLI
+      - name: Verify Build Output
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gh
+          ls -la  # List files to verify presence
+          if [ ! -f ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip ]; then
+            echo "Error: Build output file not found!"
+            exit 1
+          fi
 
       - name: Create Tag and Release
         id: create_tag
         run: |
           gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-          gh release create v${{ env.BUILD_NUMBER }} ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip --notes "Release for build number ${{ env.BUILD_NUMBER }}" "Release for build number ${{ env.BUILD_NUMBER }}"
+          gh release create v${{ env.BUILD_NUMBER }} ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip --notes "Release for build number ${{ env.BUILD_NUMBER }}" "Release for build number ${{ env.BUILD_NUMBER }}" "Release for build number ${{ env.BUILD_NUMBER }}"
