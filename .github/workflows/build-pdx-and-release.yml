@@ -55,18 +55,27 @@ jobs:
           build_number=$(grep -oP '(?<=buildNumber=)\d+' Source/pdxinfo)
           echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
 
+      - name: Create Tag
+        id: create_tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a v${{ env.BUILD_NUMBER }} -m "Release for build number ${{ env.BUILD_NUMBER }}"
+          git push origin v${{ env.BUILD_NUMBER }}
+
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v4
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          release_name: ${{ env.BUILD_NUMBER }}
+          tag_name: v${{ env.BUILD_NUMBER }}
+          release_name: TamaPlay Pre-Release v${{ env.BUILD_NUMBER }}
           draft: false
           prerelease: true
 
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v4
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
