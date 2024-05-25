@@ -55,17 +55,13 @@ jobs:
           build_number=$(grep -oP '(?<=buildNumber=)\d+' Source/pdxinfo)
           echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
 
-      - name: Setup Node (for GitHub CLI)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Install GitHub CLI
         run: |
-          npm install -g @githubnext/github-cli
+          sudo apt-get update
+          sudo apt-get install -y gh
 
       - name: Create Tag and Release
         id: create_tag
         run: |
           gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
-          gh release create v${{ env.BUILD_NUMBER }} ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip --notes "Release for build number ${{ env.BUILD_NUMBER }}"
+          gh release create v${{ env.BUILD_NUMBER }} ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip --notes "Release for build number ${{ env.BUILD_NUMBER }}" "Release for build number ${{ env.BUILD_NUMBER }}"
