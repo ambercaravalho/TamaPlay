@@ -1,8 +1,7 @@
 .DS_Store
 .luarc.json
 .vscode/
+*.pdx
 bin/
 Source/img/*~
-Source/img/*/*~
 Source/img/*autosave*
-Source/img/*/*autosave*
