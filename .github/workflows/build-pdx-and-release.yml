@@ -55,31 +55,11 @@ jobs:
           build_number=$(grep -oP '(?<=buildNumber=)\d+' Source/pdxinfo)
           echo "BUILD_NUMBER=$build_number" >> $GITHUB_ENV
 
-      - name: Create Tag
+      - name: Setup GitHub CLI
+        uses: actions/setup-gh-cli@v2
+
+      - name: Create Tag and Release
         id: create_tag
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a v${{ env.BUILD_NUMBER }} -m "Release for build number ${{ env.BUILD_NUMBER }}"
-          git push origin v${{ env.BUILD_NUMBER }}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ env.BUILD_NUMBER }}
-          release_name: TamaPlay Pre-Release v${{ env.BUILD_NUMBER }}
-          draft: false
-          prerelease: true
-
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip
-          asset_name: ${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip
-          asset_content_type: application/zip
+          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+          gh release create v${{ env.BUILD_NUMBER }} ./${{ env.BUILD_OUTPUT }}-${{ env.BUILD_NUMBER }}.zip --notes "Release for build number ${{ env.BUILD_NUMBER }}"
